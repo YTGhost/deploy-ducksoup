@@ -2,9 +2,21 @@ version: "3.9"
 
 services:
   ducksoup:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              driver: nvidia
+              count: all
     profiles:
       - ducksoup
     image: ducksoup:prod
+    networks:
+      - db_network
+    ports:
+      - "8100:8100"
+      - "3478:3478/udp"
     build:
       dockerfile: Dockerfile.ducksoup
       args:
@@ -57,8 +69,7 @@ services:
     profiles:
       - social
     user: $DOCKER_UID:$DOCKER_GID
-    image: postgres:15
-    restart: unless-stopped
+    image: restart: unless-stopped
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -69,6 +80,8 @@ services:
     networks:
       - db_network
   experiment:
+    build:
+      context: ../../experiment_templates
     profiles:
       - social
     depends_on: 

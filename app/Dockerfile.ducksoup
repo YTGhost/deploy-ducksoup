@@ -2,13 +2,18 @@ FROM ducksouplab/ducksoup:latest AS full
 
 # this lightweight image is used to set ownerships on named volume mapped to config
 # using $DOCKER_* variables in .env file as user:group value
-FROM ducksouplab/debian-gstreamer:deb11-cuda12.2-gst1.22.7 AS prod
+FROM ducksouplab/debian-gstreamer:deb12-cuda12.2-gst1.24.10 AS prod
 
 RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get install -y python3.11-dev
 
 ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/app/plugins"
 ENV GST_PLUGIN_PATH="$GST_PLUGIN_PATH:/app/plugins"
 ENV GST_DEBUG=2
+
+RUN mkdir -p /tmp/gstreamer-1.0 && chown ${UID}:${GID} /tmp/gstreamer-1.0 && chmod -R 777 /tmp/gstreamer-1.0
+ENV XDG_CACHE_HOME="/tmp"
 
 ARG UNAME
 ARG UID
